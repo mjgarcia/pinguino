@@ -35,17 +35,9 @@ def get_message_from_headers(headers):
 
     message = {}
 
-    for h in headers:
-
-        name = h['name']
-        value = h['value']
-
-        if name == 'From':
-            message['From'] = value
-        elif name == 'Subject':
-            message['Subject'] = value
-        elif name == 'Date':
-            message['Date'] = value
+    message['From'] = next(h['value'] for h in headers if h['name'] == 'From')
+    message['Subject'] = next(h['value'] for h in headers if h['name'] == 'Subject')
+    message['Date'] = next(h['value'] for h in headers if h['name'] == 'Date')
 
     return message
 
