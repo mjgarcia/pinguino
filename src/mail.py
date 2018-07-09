@@ -1,6 +1,7 @@
 from apiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
+import base64
 import logging
 
 logger = logging.getLogger(__name__)
@@ -41,13 +42,51 @@ def get_message_from_headers(headers):
 
     return message
 
+def get_message_body_from_payload(payload):
+    """
+    Recursively returns the first payload part that
+    has mime type text/plain
+    """
+
+    logger.info('Payload has mime type %s', payload['mimeType'])
+
+    if payload['mimeType'] == 'text/plain':
+
+        return payload['body']['data']
+
+    elif 'parts' in payload:
+
+        logger.info('Message has %s parts', len(payload['parts']))
+
+        for part in payload['parts']:
+            return get_message_body_from_payload(part)
+
+def decode_message_body_from_payload(payload):
+
+    base64_body = get_message_body_from_payload(payload)
+
+    if base64_body != None:
+
+        # Replace the following characters to have a valid base64 string
+        base64_body = base64_body.replace('-','+')
+        base64_body = base64_body.replace('_','/')
+
+        return base64.b64decode(base64_body)
+
+    else:
+        logger.info('Not found text/plain payload in message')
+
 def get_message_from_id(message_id):
+
+    logger.info('Getting message with id %s', message_id)
 
     message = service.users().messages().get(userId=user_id, id=message_id).execute()
     payload = message['payload']
     headers = payload['headers']
 
     message = get_message_from_headers(headers)
+
+    message['body'] = decode_message_body_from_payload(payload)
 
     return message
 
