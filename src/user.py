@@ -9,7 +9,8 @@ class User(Base):
     __tablename__ = 'User'
 
     id = Column(Integer, primary_key=True)
-    email = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False, unique=True)
+    task = Column(Integer, nullable=False)
 
 connectionString = 'mysql://{}:{}@localhost/pinguino'.format(secrets.mysqlUsername, secrets.mysqlPassword)
 engine = create_engine(connectionString)
