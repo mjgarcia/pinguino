@@ -3,18 +3,17 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 import base64
 import logging
+import secrets
 
 logger = logging.getLogger(__name__)
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
-SECRETS_FILE = 'client_secret.json'
-CREDENTIALS_STORE = 'credentials.json'
 
-store = file.Storage(CREDENTIALS_STORE)
+store = file.Storage(secrets.GMAIL_CREDENTIALS_STORE)
 creds = store.get()
 
 if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets(SECRETS_FILE, SCOPES)
+    flow = client.flow_from_clientsecrets(secrets.GMAIL_SECRETS_FILE, SCOPES)
     creds = tools.run_flow(flow, store)
 
 service = build('gmail', 'v1', http=creds.authorize(Http()))
