@@ -25,6 +25,11 @@ label_unread = 'UNREAD'
 def get_unread_messages_ids():
 
     unread_messages = service.users().messages().list(userId=user_id, labelIds=[label_inbox, label_unread]).execute()
+
+    if unread_messages['resultSizeEstimate'] == 0:
+        logger.info('No new messages found. Returning empty list.')
+        return []
+
     messages_list = unread_messages['messages']
 
     logger.info('Got %s unread message ids', len(messages_list))
