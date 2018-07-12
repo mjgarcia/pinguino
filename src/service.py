@@ -1,5 +1,6 @@
 
 import mail
+from message import Message
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,5 +15,6 @@ def run():
 
         logger.info('Working on message with id %s', id)
 
-        message = mail.get_message_from_id(id['id'])
+        message = Message(id['id'])
 
+        message.fetch()
