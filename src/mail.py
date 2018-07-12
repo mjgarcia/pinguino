@@ -36,38 +36,23 @@ def get_unread_messages_ids():
 
     return messages_list
 
-def get_message_from_headers(headers):
+def get_message_from_payload(payload):
 
     message = {}
+
+    headers = payload['headers']
 
     message['From'] = next(h['value'] for h in headers if h['name'] == 'From')
     message['Subject'] = next(h['value'] for h in headers if h['name'] == 'Subject')
     message['Date'] = next(h['value'] for h in headers if h['name'] == 'Date')
 
+    message['contents'] = get_message_contents_from_payload(payload)
+
     return message
-
-def get_message_body_from_payload(payload):
-    """
-    Recursively returns the first payload part that
-    has mime type text/plain
-    """
-
-    logger.info('Payload has mime type %s', payload['mimeType'])
-
-    if payload['mimeType'] == 'text/plain':
-
-        return payload['body']['data']
-
-    elif 'parts' in payload:
-
-        logger.info('Message has %s parts', len(payload['parts']))
-
-        for part in payload['parts']:
-            return get_message_body_from_payload(part)
 
 def decode_message_body_from_payload(payload):
 
-    base64_body = get_message_body_from_payload(payload)
+    base64_body = payload['body']['data']
 
     if base64_body != None:
 
@@ -77,8 +62,57 @@ def decode_message_body_from_payload(payload):
 
         return base64.b64decode(base64_body)
 
-    else:
-        logger.info('Not found text/plain payload in message')
+def is_message_part_the_body(part):
+
+    return (not part['filename']) and (part['mimeType'] == 'text/plain')
+
+def get_message_body_from_parts(parts):
+
+    for part in parts:
+        if is_message_part_the_body(part):
+            return decode_message_body_from_payload(part)
+
+def get_attachment_from_id(attachment_id):
+
+    attachment = service.users().messages().attachments.get(userId=user_id, messageId=message_id, id=attachment_id).execute()
+
+    return attachment
+
+def get_message_attachments_from_parts(parts):
+
+    attachments = []
+
+    for part in parts:
+
+        if part['filename']:
+            attachment = {}
+            attachment['filename'] = part['filename']
+            attachment_id = part['body']['attachmentId']
+            attachment_data = get_attachment_from_id(attachment_id)
+            attachments.append(attachment)
+
+    return attachments
+
+def get_message_contents_from_parts(parts):
+
+    contents = {}
+    contents['Body'] = get_message_body_from_parts(parts)
+    contents['Attachements'] = get_message_attachments_from_parts(parts)
+
+    return contents
+
+def get_message_contents_from_payload(payload):
+
+    if payload['mimeType'] == 'text/plain':
+
+        contents = {}
+        contents['Body'] = decode_message_body_from_payload(payload)
+
+    elif payload['mimeType'] == 'multipart/mixed':
+
+        contents = get_message_contents_from_parts(payload['parts'])
+
+    return contents
 
 def get_message_from_id(message_id):
 
@@ -86,29 +120,7 @@ def get_message_from_id(message_id):
 
     message = service.users().messages().get(userId=user_id, id=message_id).execute()
     payload = message['payload']
-    headers = payload['headers']
 
-    message = get_message_from_headers(headers)
-
-    message['body'] = decode_message_body_from_payload(payload)
+    message = get_message_from_payload(payload)
 
     return message
-
-def get_unread_messages():
-
-    messages_ids = get_unread_messages_ids()
-
-    all_messages = []
-
-    for id in messages_ids:
-
-        message = get_message_from_id(id['id'])
-
-        all_messages.append(message)
-
-    return all_messages
-
-
-
-
-
