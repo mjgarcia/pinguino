@@ -29,7 +29,7 @@ class Message:
     def __init__(self, id):
 
         self.id = id
-        self.is_valid = False
+        self.is_valid_type = False
 
     def fetch(self):
 
@@ -54,13 +54,13 @@ class Message:
 
             self.body = decode_base64_string(payload['body']['data'])
             self.attachments = []
-            self.is_valid = True
+            self.is_valid_type = True
 
         elif payload['mimeType'] == 'multipart/mixed':
 
             self.body = get_message_body_from_parts(payload['parts'])
             self.attachments = self.get_message_attachments_from_parts(payload['parts'])
-            self.is_valid = True
+            self.is_valid_type = True
 
     def get_message_attachments_from_parts(self, parts):
 
