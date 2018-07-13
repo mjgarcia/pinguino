@@ -12,7 +12,7 @@ class User(Base):
     email = Column(String(250), nullable=False, unique=True)
     task = Column(Integer, nullable=False)
 
-connectionString = 'mysql://{}:{}@localhost/pinguino'.format(secrets.mysqlUsername, secrets.mysqlPassword)
-engine = create_engine(connectionString)
+connection_string = 'mysql://{}:{}@localhost/pinguino'.format(secrets.mysql_username, secrets.mysql_password)
+engine = create_engine(connection_string)
 
 Base.metadata.create_all(engine)
