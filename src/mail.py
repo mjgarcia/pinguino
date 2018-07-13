@@ -48,6 +48,6 @@ def get_attachment_from_id(message_id, attachment_id):
 
     logger.info('Getting attachment with id %s', attachment_id)
 
-    attachment = service.users().messages().attachments.get(userId=user_id, messageId=message_id, id=attachment_id).execute()
+    attachment = service.users().messages().attachments().get(userId=user_id, messageId=message_id, id=attachment_id).execute()
 
     return attachment
