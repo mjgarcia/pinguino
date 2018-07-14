@@ -11,4 +11,6 @@ def process(message):
 
     task_common.validate_attachments(attachments_required, message.attachments)
 
-    task_common.extract_attachments(attachments_required, message)
+    sandbox_folder = task_common.extract_attachments(attachments_required, message)
+
+    task_common.compile(sandbox_folder)

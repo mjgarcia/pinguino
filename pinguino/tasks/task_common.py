@@ -27,6 +27,8 @@ def extract_attachments(attachments_required, message):
         attachment_path = os.path.join(sandbox_folder, attachment)
         create_file(attachment_path, attachment_data)
 
+    return sandbox_folder
+
 def validate_attachments(attachments_required, message_attachments):
 
     if not message_attachments or len(message_attachments) != len(attachments_required):
@@ -41,3 +43,7 @@ def validate_attachments(attachments_required, message_attachments):
     if missing_attachments:
         joined = ", ".join(missing_attachments)
         raise InvalidMessageException('Missing attachment(s) {}'.format(joined))
+
+def compile(sandbox_folder):
+
+    pass
