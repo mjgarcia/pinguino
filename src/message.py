@@ -64,16 +64,13 @@ class Message:
 
     def get_message_attachments_from_parts(self, parts):
 
-        attachments = []
+        attachments = {}
 
         for part in parts:
 
             if part['filename']:
-                attachment = {}
-                attachment['filename'] = part['filename']
                 attachment_id = part['body']['attachmentId']
                 attachment_data = mail.get_attachment_from_id(self.id, attachment_id)
-                attachment['data'] = decode_base64_string(attachment_data['data'])
-                attachments.append(attachment)
+                attachments[part['filename']] = decode_base64_string(attachment_data['data'])
 
         return attachments
